@@ -171,15 +171,27 @@ public class PolylineTrace extends Trace implements Serializable {
     if (!this.is_on_the_board()) {
       return false;
     }
-    boolean something_changed;
-    if (this.combine_at_start(true)) {
-      something_changed = true;
-      this.combine();
-    } else if (this.combine_at_end(true)) {
-      something_changed = true;
-      this.combine();
-    } else {
-      something_changed = false;
+    boolean something_changed = false;
+    // Iterative version of the previous recursive implementation. The recursion had no
+    // progress guarantee: degenerate/overlapping trace geometry can make combine_at_start/
+    // combine_at_end succeed forever, recursing until StackOverflowError (observed with
+    // hand-placed locked wires imported from a DSN). Bound the loop and warn instead.
+    int remaining_iterations = 10000;
+    while (remaining_iterations-- > 0) {
+      if (this.combine_at_start(true)) {
+        something_changed = true;
+      } else if (this.combine_at_end(true)) {
+        something_changed = true;
+      } else {
+        break;
+      }
+      if (!this.is_on_the_board()) {
+        break;
+      }
+    }
+    if (remaining_iterations <= 0) {
+      FRLogger.warn(
+          "PolylineTrace.combine: iteration limit reached (degenerate trace geometry?) -- aborting combine to avoid an infinite loop.");
     }
     if (something_changed) {
       // let the observers synchronize the changes
