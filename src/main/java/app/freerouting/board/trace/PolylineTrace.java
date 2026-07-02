@@ -180,6 +180,7 @@ public class PolylineTrace extends Trace implements Serializable {
     // (retry at the start first, then at the end) and the per-combine
     // on-board re-check and observer notification of the recursive version.
     boolean somethingChanged = false;
+    int remainingIterations = 10000;
     while (this.isOnTheBoard() && (this.combineAtStart(true) || this.combineAtEnd(true))) {
       somethingChanged = true;
       // let the observers synchronize the changes
@@ -187,6 +188,11 @@ public class PolylineTrace extends Trace implements Serializable {
         board.communication.observers.notifyChanged(this);
       }
       board.additionalUpdateAfterChange(this);
+      if (--remainingIterations == 0) {
+        FRLogger.warn(
+            "PolylineTrace.combine: iteration limit reached (degenerate trace geometry?) -- aborting combine to avoid an infinite loop.");
+        break;
+      }
     }
     return somethingChanged;
   }
