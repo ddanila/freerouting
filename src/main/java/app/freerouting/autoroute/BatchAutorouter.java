@@ -62,12 +62,12 @@ public class BatchAutorouter extends NamedAlgorithm {
   private static final int STOP_AT_PASS_MODULO = 4;
   // Number of consecutive passes with no meaningful score improvement before
   // aborting (prevents endless looping when items cannot be routed)
-  private static final int STAGNATION_PASS_LIMIT = 10;
+  private static final int STAGNATION_PASS_LIMIT = 40;
   // Number of no-improvement passes before attempting a one-time fanout-tail cleanup.
   private static final int FANOUT_RECOVERY_STAGNATION_PASSES = 3;
   // Minimum score gain (on the 0–1000 normalized scale) that counts as a
   // meaningful improvement; gains smaller than this are treated as stagnation.
-  private static final float STAGNATION_SCORE_THRESHOLD = 0.5f;
+  private static final float STAGNATION_SCORE_THRESHOLD = 0.05f;
 
   private final boolean remove_unconnected_vias;
   private final AutorouteControl.ExpansionCostFactor[] trace_cost_arr;
