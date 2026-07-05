@@ -148,6 +148,9 @@ class HeadlessRoutingTest {
         FRLogger.getLogEntries().getAsString().contains("Starting V1.9 router"),
         "Headless scheduler must instantiate BatchAutorouterV19 when router.algorithm is "
             + RouterSettings.ALGORITHM_V19);
+    assertNotNull(job.output, "Headless v1.9 routing must produce a job output object");
+    assertNotNull(job.output.getData(), "Headless v1.9 routing must serialize SES output data");
+    assertTrue(job.output.size > 0, "Headless v1.9 routing must produce non-empty SES output data");
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

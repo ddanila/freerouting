@@ -131,6 +131,8 @@ public class RoutingJobSchedulerActionThread extends StoppableThread {
         initialUnroutedCount = batchRouter.getInitialUnroutedCount();
       }
 
+      setJobOutput(job);
+
       // Log session summary
       if (sessionStartTime != null) {
         Instant sessionEndTime = Instant.now();
