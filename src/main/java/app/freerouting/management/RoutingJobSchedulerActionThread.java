@@ -2,6 +2,7 @@ package app.freerouting.management;
 
 import app.freerouting.Freerouting;
 import app.freerouting.autoroute.BatchAutorouter;
+import app.freerouting.autoroute.BatchAutorouterV19;
 import app.freerouting.autoroute.BatchOptimizer;
 import app.freerouting.autoroute.NamedAlgorithm;
 import app.freerouting.autoroute.events.BoardUpdatedEvent;
@@ -100,12 +101,14 @@ public class RoutingJobSchedulerActionThread extends StoppableThread {
       NamedAlgorithm router;
       String algorithm = job.routerSettings.algorithm;
 
-      if (!RouterSettings.ALGORITHM_CURRENT.equals(algorithm)) {
+      if (RouterSettings.ALGORITHM_V19.equals(algorithm)) {
+        router = new BatchAutorouterV19(job);
+      } else if (RouterSettings.ALGORITHM_CURRENT.equals(algorithm)) {
+        router = new BatchAutorouter(job);
+      } else {
         job.logInfo("Unknown router algorithm '" + algorithm + "', using default (freerouting-router)");
+        router = new BatchAutorouter(job);
       }
-      // Always use standard BatchAutorouter
-      router = new BatchAutorouter(job);
-      BatchAutorouter batchRouter = (BatchAutorouter) router;
 
       router.addBoardUpdatedEventListener(new BoardUpdatedEventListener() {
         @Override
@@ -114,14 +117,21 @@ public class RoutingJobSchedulerActionThread extends StoppableThread {
         }
       });
 
-      // Call runBatchLoop
-      batchRouter.runBatchLoop();
-      fanoutTimedOut = batchRouter.isFanoutTimedOut();
+      Instant sessionStartTime;
+      int initialUnroutedCount;
+      if (router instanceof BatchAutorouterV19 batchRouter) {
+        batchRouter.runBatchLoop();
+        sessionStartTime = batchRouter.getSessionStartTime();
+        initialUnroutedCount = batchRouter.getInitialUnroutedCount();
+      } else {
+        BatchAutorouter batchRouter = (BatchAutorouter) router;
+        batchRouter.runBatchLoop();
+        fanoutTimedOut = batchRouter.isFanoutTimedOut();
+        sessionStartTime = batchRouter.getSessionStartTime();
+        initialUnroutedCount = batchRouter.getInitialUnroutedCount();
+      }
 
       // Log session summary
-      Instant sessionStartTime = batchRouter.getSessionStartTime();
-      int initialUnroutedCount = batchRouter.getInitialUnroutedCount();
-
       if (sessionStartTime != null) {
         Instant sessionEndTime = Instant.now();
         long totalSeconds = java.time.Duration.between(sessionStartTime, sessionEndTime).getSeconds();

@@ -13,8 +13,10 @@ import app.freerouting.core.RoutingJobState;
 import app.freerouting.management.HeadlessBoardManager;
 import app.freerouting.management.RoutingJobScheduler;
 import app.freerouting.management.SessionManager;
+import app.freerouting.logger.FRLogger;
 import app.freerouting.util.TextManager;
 import app.freerouting.settings.GlobalSettings;
+import app.freerouting.settings.RouterSettings;
 import app.freerouting.settings.SettingsMerger;
 import app.freerouting.settings.sources.DefaultSettings;
 import app.freerouting.settings.sources.DsnFileSettings;
@@ -123,6 +125,31 @@ class HeadlessRoutingTest {
         "RoutingJob.board must be non-null after a completed headless routing run");
   }
 
+  /**
+   * Verifies that the headless scheduler honours the legacy v1.9 router selection.
+   *
+   * <p>This guards the #508 workaround path: settings/env/config can already request
+   * {@link RouterSettings#ALGORITHM_V19}, and the GUI path already honours it. The
+   * headless scheduler must not silently route with the current router instead.
+   */
+  @Test
+  void headlessRouting_usesV19RouterWhenSelected() {
+    FRLogger.getLogEntries().clear();
+
+    TestingSettings testSettings = new TestingSettings();
+    testSettings.setMaxPasses(1);
+    testSettings.setJobTimeoutString("00:00:30");
+    testSettings.getSettings().algorithm = RouterSettings.ALGORITHM_V19;
+
+    RoutingJob job = createRoutingJob("Issue508-DAC2020_bm01.dsn", testSettings);
+    runRoutingJob(job);
+
+    assertTrue(
+        FRLogger.getLogEntries().getAsString().contains("Starting V1.9 router"),
+        "Headless scheduler must instantiate BatchAutorouterV19 when router.algorithm is "
+            + RouterSettings.ALGORITHM_V19);
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   private RoutingJob createRoutingJob(String filename, TestingSettings testingSettings) {
@@ -195,4 +222,3 @@ class HeadlessRoutingTest {
     return job;
   }
 }
-
