@@ -944,6 +944,13 @@ public class Freerouting {
 
     FRLogger.debug("Host: " + globalSettings.runtimeEnvironment.host);
 
+    // fork(custom): in a headless environment (no display, or -Djava.awt.headless=true)
+    // the GUI cannot run, so force it off before probing the screen -- this avoids the
+    // spurious "Couldn't get screen resolution" warning on every headless/CI routing run.
+    if (java.awt.GraphicsEnvironment.isHeadless()) {
+      globalSettings.guiSettings.isEnabled = false;
+    }
+
     // Get some useful information if we are running in a GUI
     int width = 0;
     int height = 0;
@@ -984,27 +991,34 @@ public class Freerouting {
     // if the user has disabled analytics, we don't need to check the modulo
     allowAnalytics = !globalSettings.usageAndDiagnosticData.disableAnalytics && (globalSettings.userProfileSettings.isTelemetryAllowed);
 
+    // fork(custom): telemetry is hardwired off regardless of config, so this
+    // build makes no analytics or update-check network calls -- required for
+    // reproducible, offline, headless/CI routing.
+    allowAnalytics = false;
+
     if (!allowAnalytics) {
       FRLogger.debug("Analytics are disabled");
     }
     FRAnalytics.setEnabled(allowAnalytics);
     FRAnalytics.setUserId(globalSettings.userProfileSettings.userId, globalSettings.userProfileSettings.userEmail);
-    FRAnalytics.identify();
-    try {
-      Thread.sleep(1000);
-    } catch (Exception _) {
-    }
-    FRAnalytics.setAppLocation("app.freerouting.gui", "Freerouting");
-    FRAnalytics.appStarted(Constants.FREEROUTING_VERSION, Constants.FREEROUTING_BUILD_DATE + " 00:00",
-        String.join(" ", args), System.getProperty("os.name"), System.getProperty("os.arch"),
-        System.getProperty("os.version"), System.getProperty("java.version"), System.getProperty("java.vendor"),
-        Locale.getDefault(), globalSettings.currentLocale,
-        globalSettings.runtimeEnvironment.cpuCores, globalSettings.runtimeEnvironment.ram,
-        globalSettings.runtimeEnvironment.host, width, height, dpi);
+    if (allowAnalytics) {
+      FRAnalytics.identify();
+      try {
+        Thread.sleep(1000);
+      } catch (Exception _) {
+      }
+      FRAnalytics.setAppLocation("app.freerouting.gui", "Freerouting");
+      FRAnalytics.appStarted(Constants.FREEROUTING_VERSION, Constants.FREEROUTING_BUILD_DATE + " 00:00",
+          String.join(" ", args), System.getProperty("os.name"), System.getProperty("os.arch"),
+          System.getProperty("os.version"), System.getProperty("java.version"), System.getProperty("java.vendor"),
+          Locale.getDefault(), globalSettings.currentLocale,
+          globalSettings.runtimeEnvironment.cpuCores, globalSettings.runtimeEnvironment.ram,
+          globalSettings.runtimeEnvironment.host, width, height, dpi);
 
-    // check for new version
-    VersionChecker checker = new VersionChecker(Constants.FREEROUTING_VERSION);
-    new Thread(checker).start();
+      // check for new version
+      VersionChecker checker = new VersionChecker(Constants.FREEROUTING_VERSION);
+      new Thread(checker).start();
+    }
 
     // Check if the user requested help
     if (globalSettings.show_help_option) {

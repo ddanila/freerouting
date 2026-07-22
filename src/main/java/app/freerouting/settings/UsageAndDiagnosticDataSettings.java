@@ -7,7 +7,7 @@ import java.io.Serializable;
 public class UsageAndDiagnosticDataSettings implements Serializable {
 
   @SerializedName("disable_analytics")
-  public boolean disableAnalytics;
+  public boolean disableAnalytics = true;
   /*
    * The bigquery_service_account_key is JSON file that is generated when a new
    * service account key is created in the Google Cloud Console / IAM & Admin /
