@@ -16,9 +16,9 @@ public class UserProfileSettings implements Serializable {
 
   /** Whether telemetry collection is permitted. */
   @SerializedName("allow_telemetry")
-  public Boolean isTelemetryAllowed = true;
+  public Boolean isTelemetryAllowed = false;
 
   /** Whether Freerouting may contact the user. */
   @SerializedName("allow_contact")
-  public Boolean isContactAllowed = true;
+  public Boolean isContactAllowed = false;
 }
