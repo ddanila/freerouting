@@ -37,6 +37,13 @@ public class Packages implements Serializable {
         otherSidePackage = currentPackage;
       }
     }
+    // An exact identifier on the opposite side is still a better match than an unsuffixed
+    // fallback. KiCad commonly defines only one image for a package and places instances of that
+    // exact image on either side; replacing "name::1" with "name" here corrupts SES placement
+    // grouping and makes the session fail to import.
+    if (otherSidePackage != null) {
+      return otherSidePackage;
+    }
     String baseName = name.replaceAll("::\\d+$", "");
     if (!baseName.equalsIgnoreCase(name)) {
       for (Package currentPackage : packages) {
