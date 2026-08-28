@@ -37,8 +37,8 @@ public class Keyword {
   public static final Keyword FRONT = new Keyword("front");
   public static final Keyword GENERATED_BY_FREEROUTING = new Keyword("generated_by_freerouting");
   public static final Keyword HORIZONTAL = new Keyword("horizontal");
-  public static final Keyword HOST_CAD = new Keyword("hostCad");
-  public static final Keyword HOST_VERSION = new Keyword("hostVersion");
+  public static final Keyword HOST_CAD = new Keyword("host_cad");
+  public static final Keyword HOST_VERSION = new Keyword("host_version");
   public static final Keyword IMAGE = new Keyword("image");
   public static final Keyword JUMPER = new Keyword("jumper");
   public static final Keyword KEEPOUT = new Keyword("keepout");

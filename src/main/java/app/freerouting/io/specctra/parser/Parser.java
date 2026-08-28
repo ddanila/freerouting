@@ -107,13 +107,13 @@ public class Parser extends ScopeKeyword {
     }
     if (parserInfo.hostCad != null) {
       file.newLine();
-      file.write("(hostCad ");
+      file.write("(host_cad ");
       identifierType.write(parserInfo.hostCad, file);
       file.write(")");
     }
     if (parserInfo.hostVersion != null) {
       file.newLine();
-      file.write("(hostVersion ");
+      file.write("(host_version ");
       identifierType.write(parserInfo.hostVersion, file);
       file.write(")");
     }

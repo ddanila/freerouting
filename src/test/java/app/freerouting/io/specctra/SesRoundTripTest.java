@@ -68,6 +68,36 @@ class SesRoundTripTest {
         "SES output must start with '(session '; got: "
             + content.substring(0, Math.min(50, content.length())));
     assertTrue(content.contains("(routes"), "SES output must contain '(routes' scope");
+    assertTrue(content.contains("(host_cad "), "SES output must use the Specctra host_cad token");
+    assertTrue(
+        content.contains("(host_version "), "SES output must use the Specctra host_version token");
+    assertFalse(content.contains("(hostCad "), "Java field naming must not leak into SES grammar");
+    assertFalse(
+        content.contains("(hostVersion "), "Java field naming must not leak into SES grammar");
+  }
+
+  /** KiCad SES placement scopes must retain the exact package identifiers imported from DSN. */
+  @Test
+  void sesWriterPreservesSuffixedPackageIdentifiers() throws Exception {
+    RoutingBoard board = DsnTestFixtures.loadBoard("Issue035-ReadPlaceScope.dsn");
+
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    SesWriter.write(board, out, "Issue035-ReadPlaceScope.dsn");
+    String content = out.toString(StandardCharsets.UTF_8);
+    String componentScopes =
+        content.lines().filter(line -> line.contains("(component ")).toList().toString();
+
+    assertTrue(
+        content.contains("(component \"Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB::1\""),
+        "SES output must preserve the DSN's ::1 package identifier for KiCad import: "
+            + componentScopes);
+    assertTrue(
+        content.contains("(component \"Diode_SMD:D_SOD-123::1\""),
+        "quoted suffixed package identifiers must also be preserved: " + componentScopes);
+    assertTrue(
+        content.contains("(component \"Button_Switch_Keyboard:SW_Cherry_MX_1.25u_PCB::1\""),
+        "back-side instances must retain their exact suffixed package identifier: "
+            + componentScopes);
   }
 
   /**

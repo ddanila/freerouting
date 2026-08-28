@@ -406,8 +406,11 @@ public class Library extends ScopeKeyword {
             new app.freerouting.core.library.Package.Keepout(
                 currentKeepout.areaName, currentArea, currentLayer.no);
       }
-      String basePackageName =
-          currentPackage.name != null ? currentPackage.name.replaceAll("::\\d+$", "") : "Package";
+      // Preserve the package identifier from the DSN. KiCad deliberately emits distinct
+      // identifiers such as "DIP-16::1" for otherwise identical package definitions, and its
+      // SES importer requires placement scopes to use those exact identifiers. Collapsing them
+      // to the unsuffixed package makes the resulting session impossible to import.
+      String basePackageName = currentPackage.name != null ? currentPackage.name : "Package";
       int suffix = 0;
       while (true) {
         String testName = suffix == 0 ? basePackageName : basePackageName + "::" + suffix;

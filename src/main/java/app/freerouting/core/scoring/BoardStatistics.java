@@ -486,7 +486,7 @@ public class BoardStatistics implements Serializable {
           searchLimit = Math.min(content.length(), searchLimit + 1);
         }
         String parserScope = content.substring(parserIndex, searchLimit);
-        int hcIdx = parserScope.indexOf("(hostCad");
+        int hcIdx = parserScope.indexOf("(host_cad");
         if (hcIdx != -1) {
           int hcEnd = parserScope.indexOf(")", hcIdx);
           if (hcEnd != -1) {
@@ -494,7 +494,7 @@ public class BoardStatistics implements Serializable {
             hostCad = TextManager.removeQuotes(val);
           }
         }
-        int hvIdx = parserScope.indexOf("(hostVersion");
+        int hvIdx = parserScope.indexOf("(host_version");
         if (hvIdx != -1) {
           int hvEnd = parserScope.indexOf(")", hvIdx);
           if (hvEnd != -1) {
