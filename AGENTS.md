@@ -399,7 +399,7 @@ Key facts and invariants for all GitHub Actions workflows under `.github/workflo
 | `docker-nightly.yml` | push to `master` | Build + push multi-arch Docker image tagged `nightly` |
 | `docker-release.yml` | GitHub release published | Build + push multi-arch Docker image tagged with semver + `latest` |
 | `deploy-pages.yml` | push to `master` (paths: `website/**`) | Deploy static website to GitHub Pages |
-| `stale.yml` | daily schedule | Mark inactive issues/PRs stale after 120 days |
+| `stale.yml` | weekly schedule | Mark inactive issues/PRs stale after 120 days |
 
 ## Invariants that must be preserved in all workflows
 
